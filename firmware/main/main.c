@@ -8,7 +8,7 @@ void task_LED1(void *param)
     while (1)
     {
         printf("this is task 1\n");
-        vTaskDelay(500); // Yield CPU for 500 ms
+        vTaskDelay(1000); // Yield CPU for 500 ms
     }
 
     vTaskDelete(NULL);
@@ -19,7 +19,7 @@ void task_LED2(void *param)
     while (1)
     {
         printf("this is task 2\n");
-        vTaskDelay(1000); // Yield CPU for 1000 ms
+        vTaskDelay(300); // Yield CPU for 1000 ms
     }
 
     vTaskDelete(NULL);
