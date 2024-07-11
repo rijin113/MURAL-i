@@ -16,6 +16,11 @@
 
 #define TAG "Task"
 
+static mcpwm_timer_handle_t timer;
+static mcpwm_oper_handle_t oper;
+static mcpwm_cmpr_handle_t comparator;
+static mcpwm_gen_handle_t generator;
+
 static inline uint32_t example_angle_to_compare(int angle)
 {
     return (angle - SERVO_MIN_DEGREE) * (SERVO_MAX_PULSEWIDTH_US - SERVO_MIN_PULSEWIDTH_US) / (SERVO_MAX_DEGREE - SERVO_MIN_DEGREE) + SERVO_MIN_PULSEWIDTH_US;
@@ -67,14 +72,15 @@ void ServoSetup(mcpwm_timer_handle_t *timer, mcpwm_oper_handle_t *oper,
 
 void task_servo1(void *pvParameters)
 {
-    mcpwm_cmpr_handle_t *comparator = (mcpwm_cmpr_handle_t *)pvParameters;
+    mcpwm_cmpr_handle_t *task_comparator = (mcpwm_cmpr_handle_t *)pvParameters;
+
     int angle = 0;
     int step = 5;
     while (1) {
-        mcpwm_comparator_set_compare_value(*comparator, example_angle_to_compare(angle));
-        // printf("this is task 1\n");
+        mcpwm_comparator_set_compare_value(*task_comparator, example_angle_to_compare(angle));
+
         //Add delay, since it takes time for servo to rotate, usually 200ms/60degree rotation under 5V power supply
-        vTaskDelay(pdMS_TO_TICKS(10000));
+        vTaskDelay(pdMS_TO_TICKS(500));
         if ((angle + step) > 90 || (angle + step) < -90) {
             step *= -1;
         }
@@ -83,24 +89,8 @@ void task_servo1(void *pvParameters)
     vTaskDelete(NULL);
 }
 
-void task_servo2(void *pvParameters)
-{
-    while (1)
-    {
-        printf("this is task 2\n");
-        vTaskDelay(300); // Yield CPU for 500 ms
-    }
-}
-
 void app_main()
 {
-    mcpwm_timer_handle_t timer = NULL;
-    mcpwm_oper_handle_t oper = NULL;
-    mcpwm_cmpr_handle_t comparator = NULL;
-    mcpwm_gen_handle_t generator = NULL;
-
     ServoSetup(&timer, &oper, &comparator, &generator);
-    // task_servo1(&comparator);
     xTaskCreate(task_servo1, "RunServo", 4096, &comparator, 3, NULL);
-    // xTaskCreate(task_servo2, "RunServo2", 4096, &comparator, 3, NULL);
 }
