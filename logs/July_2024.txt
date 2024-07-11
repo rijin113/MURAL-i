@@ -1,0 +1,37 @@
+July 7, 2024
+- Started a basic ESP32 servo project (no FreeRTOS)
+  - Was able to move the servos back and forth in a loop using PWM signals
+   - There is a built-in library that allows this; it is called MCPWM
+- Learned what xTaskCreate() does and tried registering the example project as a task
+- Failed to register. Having issues like Guru Meditation Error(LoadError, LoadProhibited).
+  - Not sure what this is exactly. Could be that the task created doesn't have a large stack size
+    resulting in a stack overflow.
+
+July 8, 2024
+- Got nothing done today.
+- Still having same issues with setting up a servo as a FreeRTOS task.
+
+July 9, 2024
+- Got batteries for the RC Transmitter and Controller
+- Was able to control one servo with the RC directly (properly binded Receiver with transmitter)
+- Same issues as yesterday. Continued with debugging. 
+- Removed all servo code and started with a simple printing RTOS task.
+  - This task worked on the hardware. The scheduler also worked as expected when two tasks of different priorities
+    and delays were added.
+- The moment I had Servo code inside the task, it fails.
+
+July 10, 2024
+- Got servo registered as a task, thanks to https://esp32.com/viewtopic.php?t=37397
+- There were two problems:
+    1. I explicitly made a call to start the scheduler. ESP32 by default starts this, so recalling it
+      seems to cause some issues. So now, I only create tasks directly.
+    2. The Guru Meditation error happened not because there was a stack overflow, but because the program
+      was trying to access invalid memory.
+      - All variables needed for PWM signal generation was placed in the app_main function and they were being passed
+        into the task functions as a reference. The problem with this is that, when a new task is created, app_main exits
+        and the task function gets executed. But since app_main exited, the memory assigned for all of the variables
+        go out of scope and become invalid, still leaving the tasks to still rely on them. This is why, when the tasks
+        try accessing this memory, it fails since that memory accessed by the pointers is no longer valid.
+        The fix was to simply make these variables global or keep them local to the task function.
+        I just made them global since other tasks will probably rely on these same variables. Not an ideal change, but 
+        this will be taken into account in the future as more design changes take place.

@@ -1,0 +1,24 @@
+May - June 2024
+- Researched into different airplane models
+- Determined which parts I needed (Created a BOM)
+- Started on the CAD model of the plane (found electrical components, mechanical parts)
+- Learned Flight controls and dynamics (still unsure about how certain things work)
+- Finalized on a budget and the scope of the project
+- Ordered all parts (Servos, RC Transmitter Controller, Battery, Motors, GPS, MPU)
+- Final design pending; plan is to start the design process once all parts are in and the 
+  firmware is almost complete
+- Ultimate Goal: Create an autonomous RC plane
+ - Vision: Pilot can switch modes from manual control to auto. In manual control, all RC inputs
+   go directly into the Servos. No processing of sensors in this mode. In auto, user can simply give
+   hardcoded longitude and langitude values to direct the plane. Note, DIRECT the plane, it will be hard
+   to get the plane to go somewhere and stay there since this is a plane, not a quadcopter. So features like
+   self-balancing is out of scope.
+   - Sub-goals at the moment (interfacing stage):
+    - Start learning RTOS and see how to control one servo using a simple task.
+    - Try to see if I can achieve manual control first (see if I can control one Servo with a RC directly; no MCU)
+    - Read data from the receiver, see if I can output data.
+    - Redirect all channel inputs to the controls of the servo. See if I can control one servo with a RC
+      where the MCU acts as the middle man.
+    - Connect multiple servos (rudder, aileron, elevator), register them as seperate task and run them in parallel.
+      - Determine RTOS design structure (how to handle all tasks)
+      - Major firmware restructure will take place when I get here.

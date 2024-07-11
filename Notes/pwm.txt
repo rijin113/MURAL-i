@@ -1,0 +1,9 @@
+Servo Control:
+- controlled using a pwm signal (has a defined period, duty cycle and frequency)
+- in this case, it is being defined with a timebase period and timebase resolution.
+- MCPWM Library has four main components for setting up PWM signal generation and timers.
+    - Timer: Provides the base timing events (counting up to a period).
+    - Operator: Coordinates the actions of comparators and generators within the same group, managing their interactions based on the timer's events.
+    - Comparator: Sets the specific points within the timer period where actions should occur (e.g., when to set the GPIO pin low) (how long should the
+      signal stay HIGH for within the overall time period given.)
+    - Generator: Produces the PWM signal by setting the GPIO pin high or low according to the timer and comparator events managed by the operator.
