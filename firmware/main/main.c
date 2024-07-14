@@ -4,6 +4,9 @@
 #include "esp_system.h"
 #include "driver/mcpwm_prelude.h"
 #include "esp_log.h"
+#include "driver/uart.h"
+#include "string.h"
+#include "driver/gpio.h"
 
 #define SERVO_MIN_PULSEWIDTH_US 500  // Minimum pulse width in microsecond
 #define SERVO_MAX_PULSEWIDTH_US 2500  // Maximum pulse width in microsecond
@@ -15,7 +18,11 @@
 #define SERVO_TIMEBASE_RESOLUTION_HZ 1000000  // 1MHz, 1us per tick
 #define SERVO_TIMEBASE_PERIOD        20000    // 20000 ticks, 20ms
 
-#define TAG "Task"
+#define TXD_PIN (GPIO_NUM_17)
+#define RXD_PIN (GPIO_NUM_16)
+
+static const char *RC_TAG = "RC STATUS";
+static const char *SERVO_TAG = "SERVO STATUS";
 
 typedef struct {
     mcpwm_timer_handle_t timer;
@@ -42,6 +49,7 @@ mcpwm_gen_handle_t *get_servo_generator(ServoControl *servo) {
 
 static ServoControl servo1;
 static ServoControl servo2;
+static const int RX_BUF_SIZE = 1024;
 
 static inline uint32_t example_angle_to_compare(int angle)
 {
@@ -105,7 +113,7 @@ void task_servo1(void *pvParameters)
     int angle = 0;
     int step = 5;
     while (1) {
-        ESP_LOGE(TAG, "INSIDE TASK1");
+        ESP_LOGE(SERVO_TAG, "INSIDE TASK1");
         mcpwm_comparator_set_compare_value(*task_comparator, example_angle_to_compare(angle));
 
         //Add delay, since it takes time for servo to rotate, usually 200ms/60degree rotation under 5V power supply
@@ -125,11 +133,11 @@ void task_servo2(void *pvParameters)
     int angle = 0;
     int step = 5;
     while (1) {
-        ESP_LOGE(TAG, "INSIDE TASK2");
+        ESP_LOGE(SERVO_TAG, "INSIDE TASK2");
         mcpwm_comparator_set_compare_value(*task_comparator, example_angle_to_compare(angle));
 
         //Add delay, since it takes time for servo to rotate, usually 200ms/60degree rotation under 5V power supply
-        vTaskDelay(pdMS_TO_TICKS(500));
+        vTaskDelay(pdMS_TO_TICKS(1000));
         if ((angle + step) > 90 || (angle + step) < -90) {
             step *= -1;
         }
@@ -138,10 +146,73 @@ void task_servo2(void *pvParameters)
     vTaskDelete(NULL);
 }
 
+void RCSetup(void) {
+    const uart_config_t uart_config = {
+        .baud_rate = 115200,
+        .data_bits = UART_DATA_8_BITS,
+        .parity = UART_PARITY_DISABLE,
+        .stop_bits = UART_STOP_BITS_1,
+        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
+        .source_clk = UART_SCLK_DEFAULT,
+    };
+    uart_driver_install(UART_NUM_1, RX_BUF_SIZE * 2, 0, 0, NULL, 0);
+    uart_param_config(UART_NUM_1, &uart_config);
+    uart_set_pin(UART_NUM_1, TXD_PIN, RXD_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+    ESP_LOGI(RC_TAG, "UART initialized.");
+}
+
+void parse_ibus_data(uint8_t* data, int len) {
+    if (data[0] != 0x20) {
+        ESP_LOGE(RC_TAG, "Invalid IBus packet");
+        return;
+    }
+
+    // TODO: UNDERSTAND HOW THIS PARSING/BITSHIFTING IS DONE (seen from online forums)
+    uint16_t channels[6];
+    for (int i = 0; i < 6; i++) {
+        channels[i] = data[2 + i * 2] | (data[3 + i * 2] << 8);
+        ESP_LOGI(RC_TAG, "Channel %d: %d", i + 1, channels[i]);
+    }
+
+    uint16_t checksum = data[30] | (data[31] << 8);
+    uint16_t computed_checksum = 0xFFFF;
+    for (int i = 0; i < 30; i++) {
+        computed_checksum -= data[i];
+    }
+
+    if (checksum != computed_checksum) {
+        ESP_LOGE(RC_TAG, "Checksum mismatch: received 0x%04X, computed 0x%04X", checksum, computed_checksum);
+    } else {
+        ESP_LOGI(RC_TAG, "Checksum valid: 0x%04X", checksum);
+    }
+}
+
+void rx_rc_task(void *arg) {
+    static const char *RX_TASK_TAG = "RX_TASK";
+    ESP_LOGE(RC_TAG, "INSIDE TASK3");
+    esp_log_level_set(RX_TASK_TAG, ESP_LOG_INFO);
+    uint8_t* data = (uint8_t*) malloc(RX_BUF_SIZE+1);
+    while (1) {
+        const int rxBytes = uart_read_bytes(UART_NUM_1, data, RX_BUF_SIZE, 1000 / portTICK_PERIOD_MS);
+        if (rxBytes > 0) {
+            ESP_LOGI(RX_TASK_TAG, "Read %d bytes", rxBytes);
+            ESP_LOGI(RX_TASK_TAG, "BYTES %d DATA", *data);
+            parse_ibus_data(data, rxBytes);
+            vTaskDelay(pdMS_TO_TICKS(200));
+        }
+    }
+    free(data);
+}
+
 void app_main()
 {
+    // Setup
     ServoSetup(&servo1, 1);
     ServoSetup(&servo2, 2);
+    RCSetup();
+
+    // Task creation
+    xTaskCreate(rx_rc_task, "uart_rx_task", 4096, NULL, configMAX_PRIORITIES, NULL);
     xTaskCreate(task_servo1, "RunServo1", 4096, &(servo1.comparator), 3, NULL);
     xTaskCreate(task_servo2, "RunServo2", 4096, &(servo2.comparator), 3, NULL);
 }
