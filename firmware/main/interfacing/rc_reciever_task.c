@@ -52,7 +52,7 @@ void parse_ibus_data(uint8_t* data, int len) {
 }
 
 void rx_rc_task(void *arg) {
-    ESP_LOGE(RC_TAG, "INSIDE TASK3");
+    ESP_LOGE(RC_TAG, "LISTENING TO RECIEVER");
     esp_log_level_set(RC_TAG, ESP_LOG_INFO);
     uint8_t* data = (uint8_t*) malloc(RX_BUF_SIZE+1);
     while (1) {
