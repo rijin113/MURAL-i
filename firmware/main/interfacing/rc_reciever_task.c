@@ -9,6 +9,7 @@
 
 static const char *RC_TAG = "RC TASK";
 static const int RX_BUF_SIZE = 1024;
+uint16_t channels[6];
 
 void RCSetup(void) {
     const uart_config_t uart_config = {
@@ -32,7 +33,6 @@ void parse_ibus_data(uint8_t* data, int len) {
     }
 
     // TODO: UNDERSTAND HOW THIS PARSING/BITSHIFTING IS DONE (seen from online forums)
-    uint16_t channels[6];
     for (int i = 0; i < 6; i++) {
         channels[i] = data[2 + i * 2] | (data[3 + i * 2] << 8);
         ESP_LOGI(RC_TAG, "Channel %d: %d", i + 1, channels[i]);

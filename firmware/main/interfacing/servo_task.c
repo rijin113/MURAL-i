@@ -17,6 +17,7 @@
 #define SERVO_TIMEBASE_PERIOD        20000    // 20000 ticks, 20ms
 
 static const char *SERVO_TAG = "SERVO TASK";
+extern uint16_t channels[6];
 
 mcpwm_timer_handle_t *get_servo_timer(ServoControl *servo) {
     return &(servo->timer);
@@ -34,7 +35,7 @@ mcpwm_gen_handle_t *get_servo_generator(ServoControl *servo) {
     return &(servo->generator);
 }
 
-static inline uint32_t example_angle_to_compare(int angle)
+static inline uint32_t angle_to_compare(int angle)
 {
     return (angle - SERVO_MIN_DEGREE) * (SERVO_MAX_PULSEWIDTH_US - SERVO_MIN_PULSEWIDTH_US) / (SERVO_MAX_DEGREE - SERVO_MIN_DEGREE) + SERVO_MIN_PULSEWIDTH_US;
 }
@@ -79,7 +80,7 @@ void ServoSetup(ServoControl *servo, ServoType servo_type)
     mcpwm_new_generator(servo->oper, &generator_config, get_servo_generator(servo));
 
     // set the initial compare value, so that the servo will spin to the center position
-    mcpwm_comparator_set_compare_value(servo->comparator, example_angle_to_compare(0));
+    mcpwm_comparator_set_compare_value(servo->comparator, angle_to_compare(0));
 
     // go high on counter empty
     mcpwm_generator_set_action_on_timer_event(servo->generator,
@@ -96,18 +97,18 @@ void task_rudder(void *pvParameters)
 {
     mcpwm_cmpr_handle_t *task_comparator = (mcpwm_cmpr_handle_t *)pvParameters;
 
-    int angle = 0;
-    int step = 5;
     while (1) {
         ESP_LOGE(SERVO_TAG, "MOVING RUDDER");
-        mcpwm_comparator_set_compare_value(*task_comparator, example_angle_to_compare(angle));
+        
+        // TODO: Change all channel indexes below to match actual flight controls.
+        // For example, channel 2 might not actually be used for rudder. 
 
-        //Add delay, since it takes time for servo to rotate, usually 200ms/60degree rotation under 5V power supply
-        vTaskDelay(pdMS_TO_TICKS(1000));
-        if ((angle + step) > 90 || (angle + step) < -90) {
-            step *= -1;
-        }
-        angle += step;
+        // Linear Interpolation ([1000, 2000] to [-90, 90])
+        int rc_value = -270 + ((channels[2]) * 180 / 1000); // Linear interpolation
+
+        mcpwm_comparator_set_compare_value(*task_comparator, angle_to_compare(rc_value));
+
+        vTaskDelay(pdMS_TO_TICKS(50));
     }
     vTaskDelete(NULL);
 }
@@ -116,18 +117,15 @@ void task_elevator(void *pvParameters)
 {
     mcpwm_cmpr_handle_t *task_comparator = (mcpwm_cmpr_handle_t *)pvParameters;
 
-    int angle = 0;
-    int step = 5;
     while (1) {
         ESP_LOGE(SERVO_TAG, "MOVING ELEVATOR");
-        mcpwm_comparator_set_compare_value(*task_comparator, example_angle_to_compare(angle));
 
-        //Add delay, since it takes time for servo to rotate, usually 200ms/60degree rotation under 5V power supply
-        vTaskDelay(pdMS_TO_TICKS(500));
-        if ((angle + step) > 90 || (angle + step) < -90) {
-            step *= -1;
-        }
-        angle += step;
+        // Linear Interpolation ([1000, 2000] to [-90, 90])
+        int rc_value = -270 + ((channels[3]) * 180 / 1000); // Linear interpolation
+
+        mcpwm_comparator_set_compare_value(*task_comparator, angle_to_compare(rc_value));
+
+        vTaskDelay(pdMS_TO_TICKS(50));
     }
     vTaskDelete(NULL);
 }
