@@ -56,12 +56,14 @@ void rx_rc_task(void *arg) {
     esp_log_level_set(RC_TAG, ESP_LOG_INFO);
     uint8_t* data = (uint8_t*) malloc(RX_BUF_SIZE+1);
     while (1) {
-        const int rxBytes = uart_read_bytes(UART_NUM_1, data, RX_BUF_SIZE, 1000 / portTICK_PERIOD_MS);
+        // TODO: Modify the port tick period as well as the buffer size in the future.
+        // It is possible that optimizing for these variables will result in more smoother servo movements.
+        const int rxBytes = uart_read_bytes(UART_NUM_1, data, RX_BUF_SIZE, 50 / portTICK_PERIOD_MS);
         if (rxBytes > 0) {
             ESP_LOGI(RC_TAG, "Read %d bytes", rxBytes);
             ESP_LOGI(RC_TAG, "BYTES %d DATA", *data);
             parse_ibus_data(data, rxBytes);
-            vTaskDelay(pdMS_TO_TICKS(200));
+            vTaskDelay(pdMS_TO_TICKS(50));
         }
     }
     free(data);
