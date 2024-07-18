@@ -25,3 +25,5 @@ void ServoSetup(ServoControl *servo, ServoType task_diff);
 // Servo Tasks
 void task_rudder(void *pvParameters);
 void task_elevator(void *pvParameters);
+void task_aileron_one(void *pvParameters);
+void task_aileron_two(void *pvParameters);

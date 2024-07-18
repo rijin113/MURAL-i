@@ -11,8 +11,10 @@
 #define SERVO_MIN_DEGREE        -90   // Minimum angle
 #define SERVO_MAX_DEGREE        90    // Maximum angle
 
-#define SERVO_PULSE_GPIO             2        // GPIO connects to the PWM signal line
-#define SERVO_PULSE_GPIO2             4        // GPIO connects to the PWM signal line
+#define SERVO_PULSE_GPIO             33        // GPIO connects to the PWM signal line
+#define SERVO_PULSE_GPIO2            32        // GPIO connects to the PWM signal line
+#define SERVO_PULSE_GPIO3            2        // GPIO connects to the PWM signal line
+#define SERVO_PULSE_GPIO4            4        // GPIO connects to the PWM signal line
 #define SERVO_TIMEBASE_RESOLUTION_HZ 1000000  // 1MHz, 1us per tick
 #define SERVO_TIMEBASE_PERIOD        20000    // 20000 ticks, 20ms
 
@@ -73,6 +75,12 @@ void ServoSetup(ServoControl *servo, ServoType servo_type)
         case ELEVATOR:
             generator_config.gen_gpio_num = SERVO_PULSE_GPIO2;
             break;
+        case AILERON1:
+            generator_config.gen_gpio_num = SERVO_PULSE_GPIO3;
+            break;
+        case AILERON2:
+            generator_config.gen_gpio_num = SERVO_PULSE_GPIO4;
+            break;
         default:
             break;
     }
@@ -122,6 +130,41 @@ void task_elevator(void *pvParameters)
 
         // Linear Interpolation ([1000, 2000] to [-90, 90])
         int rc_value = -270 + ((channels[3]) * 180 / 1000); // Linear interpolation
+
+        mcpwm_comparator_set_compare_value(*task_comparator, angle_to_compare(rc_value));
+
+        vTaskDelay(pdMS_TO_TICKS(50));
+    }
+    vTaskDelete(NULL);
+}
+
+void task_aileron_one(void *pvParameters)
+{
+    mcpwm_cmpr_handle_t *task_comparator = (mcpwm_cmpr_handle_t *)pvParameters;
+
+    while (1) {
+        ESP_LOGE(SERVO_TAG, "MOVING AILERON ONE");
+
+        // Linear Interpolation ([1000, 2000] to [-90, 90])
+        int rc_value = -270 + ((channels[1]) * 180 / 1000); // Linear interpolation
+
+        mcpwm_comparator_set_compare_value(*task_comparator, angle_to_compare(rc_value));
+
+        vTaskDelay(pdMS_TO_TICKS(100));
+    }
+    vTaskDelete(NULL);
+}
+
+void task_aileron_two(void *pvParameters)
+{
+    mcpwm_cmpr_handle_t *task_comparator = (mcpwm_cmpr_handle_t *)pvParameters;
+
+    while (1) {
+        ESP_LOGE(SERVO_TAG, "MOVING AILERON TWO");
+
+        // Linear Interpolation ([1000, 2000] to [-90, 90])
+        int rc_value = -270 + ((channels[0]) * 180 / 1000); // Linear interpolation
+        ESP_LOGE(SERVO_TAG, "AILERON TWO DATA: %d", rc_value);
 
         mcpwm_comparator_set_compare_value(*task_comparator, angle_to_compare(rc_value));
 
