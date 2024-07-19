@@ -11,10 +11,11 @@
 #define SERVO_MIN_DEGREE        -90   // Minimum angle
 #define SERVO_MAX_DEGREE        90    // Maximum angle
 
-#define SERVO_PULSE_GPIO             33        // GPIO connects to the PWM signal line
-#define SERVO_PULSE_GPIO2            32        // GPIO connects to the PWM signal line
-#define SERVO_PULSE_GPIO3            2        // GPIO connects to the PWM signal line
-#define SERVO_PULSE_GPIO4            4        // GPIO connects to the PWM signal line
+// All the GPIOs below connect to the PWM signal line
+#define SERVO_GPIO_RUDDER            2
+#define SERVO_GPIO_ELEVATOR          5        
+#define SERVO_GPIO_AILERON1          32      
+#define SERVO_GPIO_AILERON2          33       
 #define SERVO_TIMEBASE_RESOLUTION_HZ 1000000  // 1MHz, 1us per tick
 #define SERVO_TIMEBASE_PERIOD        20000    // 20000 ticks, 20ms
 
@@ -70,16 +71,16 @@ void ServoSetup(ServoControl *servo, ServoType servo_type)
     switch (servo_type)
     {
         case RUDDER:
-            generator_config.gen_gpio_num = SERVO_PULSE_GPIO;
+            generator_config.gen_gpio_num = SERVO_GPIO_RUDDER;
             break;
         case ELEVATOR:
-            generator_config.gen_gpio_num = SERVO_PULSE_GPIO2;
+            generator_config.gen_gpio_num = SERVO_GPIO_ELEVATOR;
             break;
         case AILERON1:
-            generator_config.gen_gpio_num = SERVO_PULSE_GPIO3;
+            generator_config.gen_gpio_num = SERVO_GPIO_AILERON1;
             break;
         case AILERON2:
-            generator_config.gen_gpio_num = SERVO_PULSE_GPIO4;
+            generator_config.gen_gpio_num = SERVO_GPIO_AILERON2;
             break;
         default:
             break;
@@ -112,7 +113,7 @@ void task_rudder(void *pvParameters)
         // For example, channel 2 might not actually be used for rudder. 
 
         // Linear Interpolation ([1000, 2000] to [-90, 90])
-        int rc_value = -270 + ((channels[2]) * 180 / 1000); // Linear interpolation
+        int rc_value = -270 + ((channels[0]) * 180 / 1000); // Linear interpolation
 
         mcpwm_comparator_set_compare_value(*task_comparator, angle_to_compare(rc_value));
 
@@ -129,7 +130,7 @@ void task_elevator(void *pvParameters)
         ESP_LOGE(SERVO_TAG, "MOVING ELEVATOR");
 
         // Linear Interpolation ([1000, 2000] to [-90, 90])
-        int rc_value = -270 + ((channels[3]) * 180 / 1000); // Linear interpolation
+        int rc_value = -270 + ((channels[1]) * 180 / 1000); // Linear interpolation
 
         mcpwm_comparator_set_compare_value(*task_comparator, angle_to_compare(rc_value));
 
@@ -146,7 +147,7 @@ void task_aileron_one(void *pvParameters)
         ESP_LOGE(SERVO_TAG, "MOVING AILERON ONE");
 
         // Linear Interpolation ([1000, 2000] to [-90, 90])
-        int rc_value = -270 + ((channels[1]) * 180 / 1000); // Linear interpolation
+        int rc_value = -270 + ((channels[2]) * 180 / 1000); // Linear interpolation
 
         mcpwm_comparator_set_compare_value(*task_comparator, angle_to_compare(rc_value));
 
@@ -163,7 +164,7 @@ void task_aileron_two(void *pvParameters)
         ESP_LOGE(SERVO_TAG, "MOVING AILERON TWO");
 
         // Linear Interpolation ([1000, 2000] to [-90, 90])
-        int rc_value = -270 + ((channels[0]) * 180 / 1000); // Linear interpolation
+        int rc_value = -270 + ((channels[3]) * 180 / 1000); // Linear interpolation
         ESP_LOGE(SERVO_TAG, "AILERON TWO DATA: %d", rc_value);
 
         mcpwm_comparator_set_compare_value(*task_comparator, angle_to_compare(rc_value));

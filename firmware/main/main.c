@@ -29,6 +29,6 @@ void app_main()
     /* Tasks for Servos (flying controls) */
     xTaskCreate(task_rudder, "StartRudder", 4096, &(servo_rudder.comparator), 3, NULL);
     xTaskCreate(task_elevator, "StartElevator", 4096, &(servo_elevator.comparator), 3, NULL);
-    // xTaskCreate(task_aileron_one, "StartAileronOne", 4096, &(servo_aileron_one.comparator), 3, NULL);
+    xTaskCreate(task_aileron_one, "StartAileronOne", 4096, &(servo_aileron_one.comparator), 3, NULL);
     xTaskCreate(task_aileron_two, "StartAileronTwo", 4096, &(servo_aileron_two.comparator), 3, NULL);
 }
