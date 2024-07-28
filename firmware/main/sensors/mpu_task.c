@@ -29,65 +29,65 @@ void mpu6050_init()
  * the gyro and the accelerometer. Currently, it is not user configurable.
  */
 
-void mpu6050_read_gyro()
-{
-	gyro_data gyro;
+// void mpu6050_read_gyro()
+// {
+// 	gyro_data gyro;
 
-    /* Gyroscope Measurements */
-    // x-axis
-    HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDR, GYRO_XOUT_HIGH, 1, &gyro.x_data[0], 1, 100);
-    HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDR, GYRO_XOUT_LOW, 1, &gyro.x_data[1], 1, 100);
+//     /* Gyroscope Measurements */
+//     // x-axis
+//     HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDR, GYRO_XOUT_HIGH, 1, &gyro.x_data[0], 1, 100);
+//     HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDR, GYRO_XOUT_LOW, 1, &gyro.x_data[1], 1, 100);
 
-    gyro.x_val_raw = ((int16_t)gyro.x_data[0] << 8) | gyro.x_data[1];
-    gyro.x_val = (((float)gyro.x_val_raw)/GYRO_SENSITIVITY);
+//     gyro.x_val_raw = ((int16_t)gyro.x_data[0] << 8) | gyro.x_data[1];
+//     gyro.x_val = (((float)gyro.x_val_raw)/GYRO_SENSITIVITY);
 
-    // y-axis
-    HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDR, GYRO_YOUT_HIGH, 1, &gyro.y_data[0], 1, 100);
-    HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDR, GYRO_YOUT_LOW, 1, &gyro.y_data[1], 1, 100);
+//     // y-axis
+//     HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDR, GYRO_YOUT_HIGH, 1, &gyro.y_data[0], 1, 100);
+//     HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDR, GYRO_YOUT_LOW, 1, &gyro.y_data[1], 1, 100);
 
-    gyro.y_val_raw = ((int16_t)gyro.y_data[0] << 8) | gyro.y_data[1];
-    gyro.y_val = (((float)gyro.y_val_raw)/GYRO_SENSITIVITY);
+//     gyro.y_val_raw = ((int16_t)gyro.y_data[0] << 8) | gyro.y_data[1];
+//     gyro.y_val = (((float)gyro.y_val_raw)/GYRO_SENSITIVITY);
 
-    // z-axis
-    HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDR, GYRO_ZOUT_HIGH, 1, &gyro.z_data[0], 1, 100);
-    HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDR, GYRO_ZOUT_LOW, 1, &gyro.z_data[1], 1, 100);
+//     // z-axis
+//     HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDR, GYRO_ZOUT_HIGH, 1, &gyro.z_data[0], 1, 100);
+//     HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDR, GYRO_ZOUT_LOW, 1, &gyro.z_data[1], 1, 100);
 
-    gyro.z_val_raw = ((int16_t)gyro.z_data[0] << 8) | gyro.z_data[1];
-    gyro.z_val = (((float)gyro.z_val_raw)/GYRO_SENSITIVITY);
+//     gyro.z_val_raw = ((int16_t)gyro.z_data[0] << 8) | gyro.z_data[1];
+//     gyro.z_val = (((float)gyro.z_val_raw)/GYRO_SENSITIVITY);
 
-    printf(" x-axis gyro: %.2f , y-axis gyro: %.2f, z-axis gyro: %.2f\n\r",
-    		gyro.x_val, gyro.y_val, gyro.z_val);
-}
+//     printf(" x-axis gyro: %.2f , y-axis gyro: %.2f, z-axis gyro: %.2f\n\r",
+//     		gyro.x_val, gyro.y_val, gyro.z_val);
+// }
 
-void mpu6050_read_accel()
-{
-	accel_data accel;
+// void mpu6050_read_accel()
+// {
+// 	accel_data accel;
 
-    /* Accelerometer Measurements */
-	// x-axis
-    HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDR, ACCEL_XOUT_HIGH, 1, &accel.x_data[0], 1, 100);
-    HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDR, ACCEL_XOUT_LOW, 1, &accel.x_data[1], 1, 100);
+//     /* Accelerometer Measurements */
+// 	// x-axis
+//     HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDR, ACCEL_XOUT_HIGH, 1, &accel.x_data[0], 1, 100);
+//     HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDR, ACCEL_XOUT_LOW, 1, &accel.x_data[1], 1, 100);
 
-    accel.x_val_raw = ((int16_t)accel.x_data[0] << 8) | accel.x_data[1];
-    accel.x_val = (((float)accel.x_val_raw))/ACCEL_SENSITIVITY;
+//     accel.x_val_raw = ((int16_t)accel.x_data[0] << 8) | accel.x_data[1];
+//     accel.x_val = (((float)accel.x_val_raw))/ACCEL_SENSITIVITY;
 
-    // y-axis
-    HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDR, ACCEL_YOUT_HIGH, 1, &accel.y_data[0], 1, 100);
-    HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDR, ACCEL_YOUT_LOW, 1, &accel.y_data[1], 1, 100);
+//     // y-axis
+//     HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDR, ACCEL_YOUT_HIGH, 1, &accel.y_data[0], 1, 100);
+//     HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDR, ACCEL_YOUT_LOW, 1, &accel.y_data[1], 1, 100);
 
-    accel.y_val_raw = ((int16_t)accel.y_data[0] << 8) | accel.y_data[1];
-    accel.y_val = (((float)accel.y_val_raw))/ACCEL_SENSITIVITY;
+//     accel.y_val_raw = ((int16_t)accel.y_data[0] << 8) | accel.y_data[1];
+//     accel.y_val = (((float)accel.y_val_raw))/ACCEL_SENSITIVITY;
 
-    // z-axis
-    HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDR, ACCEL_ZOUT_HIGH, 1, &accel.z_data[0], 1, 100);
-    HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDR, ACCEL_ZOUT_LOW, 1, &accel.z_data[1], 1, 100);
+//     // z-axis
+//     HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDR, ACCEL_ZOUT_HIGH, 1, &accel.z_data[0], 1, 100);
+//     HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDR, ACCEL_ZOUT_LOW, 1, &accel.z_data[1], 1, 100);
 
-    accel.z_val_raw = ((int16_t)accel.z_data[0] << 8) | accel.z_data[1];
-    accel.z_val = (((float)accel.z_val_raw))/ACCEL_SENSITIVITY;
+//     accel.z_val_raw = ((int16_t)accel.z_data[0] << 8) | accel.z_data[1];
+//     accel.z_val = (((float)accel.z_val_raw))/ACCEL_SENSITIVITY;
 
-    accel.roll_angle = atan(accel.y_val/sqrt((accel.x_val*accel.x_val)+(accel.z_val*accel.z_val))) * 1/(3.142/180);
-    accel.pitch_angle = (-atan(accel.x_val/sqrt((accel.y_val*accel.y_val)+(accel.z_val*accel.z_val))) * 1/(3.142/180))+5.0;
+//     accel.roll_angle = atan(accel.y_val/sqrt((accel.x_val*accel.x_val)+(accel.z_val*accel.z_val))) * 1/(3.142/180);
+//     accel.pitch_angle = (-atan(accel.x_val/sqrt((accel.y_val*accel.y_val)+(accel.z_val*accel.z_val))) * 1/(3.142/180))+5.0;
 
-    printf(" x-axis acceleration: %.2f , y-axis acceleration: %.2f, z-axis acceleration: %.2f\n\r",
-    		accel.x_val, accel.y_val, accel.z_val);
-}
+//     printf(" x-axis acceleration: %.2f , y-axis acceleration: %.2f, z-axis acceleration: %.2f\n\r",
+//     		accel.x_val, accel.y_val, accel.z_val);
+// }
