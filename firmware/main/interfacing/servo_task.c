@@ -148,13 +148,21 @@ void task_elevator(void *pvParameters)
 {
     mcpwm_cmpr_handle_t *task_comparator = (mcpwm_cmpr_handle_t *)pvParameters;
 
+    if (*task_comparator == NULL)
+    {
+        ESP_LOGE(SERVO_TAG, "TASK COMPARATOR IS NULL");
+    }
+
     while (1) {
-        ESP_LOGE(SERVO_TAG, "MOVING ELEVATOR");
+        ESP_LOGE(SERVO_TAG, "MOVING Elevator");
 
         // Linear Interpolation ([1000, 2000] to [-90, 90])
-        int rc_value = -1*(-270 + ((channels[2]) * 180 / 1000)); // Linear interpolation
+        int rc_value = -270 + ((channels[3]) * 180 / 1000); // Linear interpolation
 
-        ESP_LOGE(SERVO_TAG, "ELEVATOR RC VALUE: %d", rc_value);
+        ESP_LOGE(SERVO_TAG, "Elevator RC VALUE: %d", rc_value);
+
+        // OPTION 1: CONTRL BOTH AILERONS WITH ONE GPIO PIN (invert signal to flip rotation)
+        // OPTION 2: TRY CALLING BOTH COMPARATORS IN ONE TASK INSTEAD OF TWO DIFFERENT TASKS (MAKES MORE SENSE TOO)
 
         mcpwm_comparator_set_compare_value(*task_comparator, angle_to_compare(rc_value));
 
@@ -176,9 +184,12 @@ void task_rudder(void *pvParameters)
         ESP_LOGE(SERVO_TAG, "MOVING RUDDER");
 
         // Linear Interpolation ([1000, 2000] to [-90, 90])
-        int rc_value = -270 + ((channels[3]) * 180 / 1000); // Linear interpolation
+        int rc_value = -270 + ((channels[2]) * 180 / 1000); // Linear interpolation
 
         ESP_LOGE(SERVO_TAG, "RUDDER RC VALUE: %d", rc_value);
+
+        // OPTION 1: CONTRL BOTH AILERONS WITH ONE GPIO PIN (invert signal to flip rotation)
+        // OPTION 2: TRY CALLING BOTH COMPARATORS IN ONE TASK INSTEAD OF TWO DIFFERENT TASKS (MAKES MORE SENSE TOO)
 
         mcpwm_comparator_set_compare_value(*task_comparator, angle_to_compare(rc_value));
 
