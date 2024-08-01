@@ -144,47 +144,44 @@ void task_aileron_two(void *pvParameters)
     vTaskDelete(NULL);
 }
 
-void task_elevator(void *pvParameters)
-{
-    mcpwm_cmpr_handle_t *task_comparator = (mcpwm_cmpr_handle_t *)pvParameters;
+// void task_elevator(void *pvParameters)
+// {
+//     mcpwm_cmpr_handle_t *task_comparator = (mcpwm_cmpr_handle_t *)pvParameters;
 
-    if (*task_comparator == NULL)
-    {
-        ESP_LOGE(SERVO_TAG, "TASK COMPARATOR IS NULL");
-    }
+//     if (*task_comparator == NULL)
+//     {
+//         ESP_LOGE(SERVO_TAG, "TASK COMPARATOR IS NULL");
+//     }
 
-    while (1) {
-        ESP_LOGE(SERVO_TAG, "MOVING Elevator");
+//     while (1) {
+//         ESP_LOGE(SERVO_TAG, "MOVING Elevator");
 
-        // Linear Interpolation ([1000, 2000] to [-90, 90])
-        int rc_value = -270 + ((channels[3]) * 180 / 1000); // Linear interpolation
+//         // Linear Interpolation ([1000, 2000] to [-90, 90])
+//         int rc_value = -270 + ((channels[3]) * 180 / 1000); // Linear interpolation
 
-        ESP_LOGE(SERVO_TAG, "Elevator RC VALUE: %d", rc_value);
+//         ESP_LOGE(SERVO_TAG, "Elevator RC VALUE: %d", rc_value);
 
-        // OPTION 1: CONTRL BOTH AILERONS WITH ONE GPIO PIN (invert signal to flip rotation)
-        // OPTION 2: TRY CALLING BOTH COMPARATORS IN ONE TASK INSTEAD OF TWO DIFFERENT TASKS (MAKES MORE SENSE TOO)
+//         // OPTION 1: CONTRL BOTH AILERONS WITH ONE GPIO PIN (invert signal to flip rotation)
+//         // OPTION 2: TRY CALLING BOTH COMPARATORS IN ONE TASK INSTEAD OF TWO DIFFERENT TASKS (MAKES MORE SENSE TOO)
 
-        mcpwm_comparator_set_compare_value(*task_comparator, angle_to_compare(rc_value));
+//         mcpwm_comparator_set_compare_value(*task_comparator, angle_to_compare(rc_value));
 
-        // vTaskDelay(pdMS_TO_TICKS(50));
-    }
-    vTaskDelete(NULL);
-}
+//         // vTaskDelay(pdMS_TO_TICKS(50));
+//     }
+//     vTaskDelete(NULL);
+// }
 
 void task_rudder(void *pvParameters)
 {
-    mcpwm_cmpr_handle_t *task_comparator = (mcpwm_cmpr_handle_t *)pvParameters;
+    mcpwm_cmpr_handle_t *task_comparator = &(((ServoControl *)pvParameters)[1].comparator);
 
-    if (*task_comparator == NULL)
-    {
-        ESP_LOGE(SERVO_TAG, "TASK COMPARATOR IS NULL");
-    }
+    // mcpwm_cmpr_handle_t *task_comparator = (mcpwm_cmpr_handle_t *)pvParameters;
 
     while (1) {
         ESP_LOGE(SERVO_TAG, "MOVING RUDDER");
 
         // Linear Interpolation ([1000, 2000] to [-90, 90])
-        int rc_value = -270 + ((channels[2]) * 180 / 1000); // Linear interpolation
+        int rc_value = -270 + ((channels[3]) * 180 / 1000); // Linear interpolation
 
         ESP_LOGE(SERVO_TAG, "RUDDER RC VALUE: %d", rc_value);
 
@@ -197,3 +194,10 @@ void task_rudder(void *pvParameters)
     }
     vTaskDelete(NULL);
 }
+
+
+// UPDATES (July 31, 2024):
+// Got motor running with RC (manual control only) (need to make it a task)
+// Something wrong with ServoSetup() I think (consecutive times fail)
+// Add debug statements inside to see where it might be failing
+// Change groupid for each servo task (see if that fixes things)
