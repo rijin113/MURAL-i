@@ -7,6 +7,20 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
+/*
+General Information:
+iBus is a serial protocol provided by Flysky. It can be decoded similar to UART. 
+Each packet consists of 32 bytes and it is transmitted every 7 ms.
+
+Packet Structure:
+- 2 header bytes (0x20 and 0x40)
+- 28 bytes, representing 14 RC Channels (note we only need 6 here)
+    - Each channel value is split into two bytes. The first byte of the pair
+      is the low side byte and the second is the high side byte.
+    - This requires bitwise manipulations.
+- 2 checksum bytes (used for validating packet transmission as shown below)
+*/
+
 static const char *RC_TAG = "RC TASK";
 static const int RX_BUF_SIZE = 1024;
 uint16_t channels[6];
@@ -27,17 +41,19 @@ void RCSetup(void) {
 }
 
 void parse_ibus_data(uint8_t* data, int len) {
+    // Check if first byte is header byte
     if (data[0] != 0x20) {
         ESP_LOGE(RC_TAG, "Invalid IBus packet");
         return;
     }
 
-    // TODO: UNDERSTAND HOW THIS PARSING/BITSHIFTING IS DONE (seen from online forums)
+    // Decode channel data
     for (int i = 0; i < 6; i++) {
         channels[i] = data[2 + i * 2] | (data[3 + i * 2] << 8);
         ESP_LOGI(RC_TAG, "Channel %d: %d", i + 1, channels[i]);
     }
 
+    // Validate packet
     uint16_t checksum = data[30] | (data[31] << 8);
     uint16_t computed_checksum = 0xFFFF;
     for (int i = 0; i < 30; i++) {

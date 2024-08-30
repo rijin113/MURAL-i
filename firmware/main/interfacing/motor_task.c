@@ -6,12 +6,6 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-/*
-Flight Control Mapping:
-Channel 1 and Channel 2 is used for roll (Ailerons)
-Channel 3 is for plane collective (elevator)
-Channel 4 is for yaw (rudder)
-*/
 
 #define SERVO_MIN_PULSEWIDTH_US 500  // Minimum pulse width in microsecond
 #define SERVO_MAX_PULSEWIDTH_US 2500  // Maximum pulse width in microsecond
